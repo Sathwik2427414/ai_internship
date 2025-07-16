@@ -1,0 +1,75 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+data = {
+    'StudentID': range(1, 101),
+    'Math_Score': np.random.randint(50, 100, 100),
+    'Science_Score': np.random.randint(45, 95, 100),
+    'English_Score': np.random.randint(60, 100, 100),
+    'Attendance_Percentage': np.random.uniform(70, 100, 100).round(2),
+    'Gender': np.random.choice(['Male', 'Female'], 100),
+    'Class': np.random.choice(['Class A', 'Class B', 'Class C'], 100)
+}
+df = pd.DataFrame(data)
+csv_file_path = 'student_data.csv'
+df.to_csv(csv_file_path, index=False)
+print(f"Sample data saved to {csv_file_path}")
+
+try:
+    df = pd.read_csv(csv_file_path)
+    print("\nCSV file loaded successfully!")
+    print("\nFirst 5 rows of the DataFrame:")
+    print(df.head())
+    print("\nDataFrame Info:")
+    df.info()
+except FileNotFoundError:
+    print(f"Error: The file '{csv_file_path}' was not found. Please ensure it's in the correct directory.")
+    exit()
+
+print("\n--- Basic Data Analysis ---")
+
+average_math_score = df['Math_Score'].mean()
+print(f"Average Math Score: {average_math_score:.2f}")
+
+print("\nDescriptive Statistics for Numerical Columns:")
+print(df.describe())
+
+print("\nValue Counts for Gender:")
+print(df['Gender'].value_counts())
+
+print("\nAverage Scores by Class:")
+print(df.groupby('Class')[['Math_Score', 'Science_Score', 'English_Score']].mean())
+
+print("\n--- Creating Visualizations ---")
+
+plt.style.use('seaborn-v0_8-darkgrid')
+
+plt.figure(figsize=(8, 6))
+gender_scores = df.groupby('Gender')[['Math_Score', 'Science_Score', 'English_Score']].mean()
+gender_scores.plot(kind='bar', ax=plt.gca(), cmap='viridis')
+plt.title('Average Scores by Gender')
+plt.xlabel('Gender')
+plt.ylabel('Average Score')
+plt.xticks(rotation=0)
+plt.legend(title='Subject')
+plt.tight_layout()
+plt.show()
+
+plt.figure(figsize=(10, 7))
+plt.scatter(df['Math_Score'], df['Science_Score'], c=df['Attendance_Percentage'], cmap='plasma', s=df['English_Score'])
+plt.colorbar(label='Attendance Percentage')
+plt.xlabel('Math Score')
+plt.ylabel('Science Score')
+plt.title('Math Score vs. Science Score (Colored by Attendance, Sized by English Score)')
+plt.grid(True)
+plt.tight_layout()
+plt.show()
+
+plt.figure(figsize=(8, 7))
+correlation_matrix = df[['Math_Score', 'Science_Score', 'English_Score', 'Attendance_Percentage']].corr()
+sns.heatmap(correlation_matrix, annot=True, cmap='coolwarm', fmt=".2f", linewidths=.5)
+plt.title('Correlation Matrix of Scores and Attendance')
+plt.tight_layout()
+plt.show()
